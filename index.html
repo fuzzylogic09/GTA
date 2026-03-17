@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GTA Maps</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;background:#000;font-family:'Share Tech Mono',monospace;color:#fff;}
+
+#cityScreen{
+  position:fixed;inset:0;z-index:9999;background:#0a0a0a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;padding:20px;overflow-y:auto;
+}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,11vw,100px);letter-spacing:6px;color:#ff4500;text-shadow:0 0 40px #ff450077,4px 4px 0 #800;line-height:1;}
+.logo span{color:#fff;}
+.subtitle{font-size:11px;color:#555;letter-spacing:4px;text-transform:uppercase;}
+.cities-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(560px,95vw);}
+.city-btn{background:#111;border:1px solid #2a2a2a;color:#aaa;padding:12px 6px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,4vw,20px);letter-spacing:2px;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.city-btn:hover,.city-btn:active{background:#ff4500;border-color:#ff4500;color:#fff;box-shadow:0 4px 20px #ff450055;}
+.city-btn .flag{font-size:20px;}
+.city-btn .ctry{font-family:'Share Tech Mono',monospace;font-size:9px;color:#444;letter-spacing:1px;}
+.city-btn:hover .ctry,.city-btn:active .ctry{color:#ffbb88;}
+.hint{font-size:10px;color:#333;letter-spacing:1px;text-align:center;line-height:2.2;}
+
+#loadScreen{position:fixed;inset:0;z-index:9998;background:#0a0a0a;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.load-city{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:6px;color:#ff4500;}
+.load-bar-bg{width:260px;height:3px;background:#1a1a1a;}
+.load-bar{height:3px;background:#ff4500;width:0%;box-shadow:0 0 10px #ff4500;transition:width .2s;}
+.load-status{font-size:11px;color:#444;letter-spacing:2px;}
+
+#gameScreen{position:fixed;inset:0;display:none;}
+#map{position:absolute;top:0;left:0;width:100%;height:100%;}
+#overlay{position:absolute;top:0;left:0;pointer-events:none;z-index:400;}
+
+#hud{position:absolute;inset:0;pointer-events:none;z-index:500;}
+.hud-tl{position:absolute;top:12px;left:14px;}
+.hud-city-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:#ff4500;text-shadow:2px 2px 0 #600;}
+.hud-coords{font-size:9px;color:#333;letter-spacing:1px;margin-top:2px;}
+.hud-speed-box{position:absolute;top:8px;right:14px;text-align:right;}
+.hud-kmh{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;color:#fff;text-shadow:0 0 30px #ff450066;}
+.hud-unit{font-size:11px;color:#ff4500;letter-spacing:3px;}
+.hud-gear{position:absolute;top:74px;right:16px;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#444;letter-spacing:2px;}
+.hud-gear.rev{color:#ff4500;}
+#hitFlash{position:absolute;inset:0;background:rgba(255,50,0,.3);pointer-events:none;z-index:450;opacity:0;transition:opacity .05s;}
+
+#minimapWrap{position:absolute;bottom:16px;right:14px;z-index:500;width:130px;height:130px;border:2px solid #ff4500;box-shadow:0 0 16px #ff450055;overflow:hidden;}
+#minimapCanvas{display:block;}
+.mm-label{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:9px;color:#ff4500;letter-spacing:2px;}
+
+#backBtn{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:600;pointer-events:all;background:rgba(0,0,0,.7);border:1px solid #2a2a2a;color:#444;font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 14px;cursor:pointer;letter-spacing:2px;transition:all .2s;}
+#backBtn:hover{border-color:#ff4500;color:#ff4500;}
+
+#touchControls{position:absolute;bottom:16px;left:14px;z-index:600;pointer-events:all;display:flex;flex-direction:column;gap:6px;align-items:center;}
+.tc-row{display:flex;gap:6px;}
+.tc-btn{width:54px;height:54px;background:rgba(10,10,10,.82);border:2px solid #2a2a2a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:background .08s,border-color .08s;}
+.tc-btn.pressed{background:rgba(255,69,0,.45);border-color:#ff4500;box-shadow:0 0 14px #ff450077;}
+
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);}
+</style>
+</head>
+<body>
+
+<div id="cityScreen">
+  <div class="logo">GTA<span>Maps</span></div>
+  <div class="subtitle">choisissez votre ville</div>
+  <div class="cities-grid">
+    <button class="city-btn" onclick="pickCity('Paris',48.8566,2.3522)"><span class="flag">🗼</span>Paris<span class="ctry">France</span></button>
+    <button class="city-btn" onclick="pickCity('New York',40.7580,-73.9855)"><span class="flag">🗽</span>New York<span class="ctry">USA</span></button>
+    <button class="city-btn" onclick="pickCity('Tokyo',35.6762,139.6503)"><span class="flag">⛩️</span>Tokyo<span class="ctry">Japon</span></button>
+    <button class="city-btn" onclick="pickCity('Londres',51.5074,-0.1278)"><span class="flag">🎡</span>Londres<span class="ctry">UK</span></button>
+    <button class="city-btn" onclick="pickCity('Dubai',25.2048,55.2708)"><span class="flag">🏙️</span>Dubai<span class="ctry">UAE</span></button>
+    <button class="city-btn" onclick="pickCity('Sydney',-33.8688,151.2093)"><span class="flag">🦘</span>Sydney<span class="ctry">Australie</span></button>
+    <button class="city-btn" onclick="pickCity('Rome',41.9028,12.4964)"><span class="flag">🏛️</span>Rome<span class="ctry">Italie</span></button>
+    <button class="city-btn" onclick="pickCity('Los Angeles',34.0522,-118.2437)"><span class="flag">🌴</span>Los Angeles<span class="ctry">USA</span></button>
+    <button class="city-btn" onclick="pickCity('Hong Kong',22.3193,114.1694)"><span class="flag">🏮</span>Hong Kong<span class="ctry">Chine</span></button>
+  </div>
+  <div class="hint">ZQSD / WASD / Flèches · Mobile : boutons tactiles</div>
+</div>
+
+<div id="loadScreen">
+  <div class="load-city" id="loadCityName">—</div>
+  <div class="load-bar-bg"><div class="load-bar" id="loadBar"></div></div>
+  <div class="load-status" id="loadStatus">CHARGEMENT…</div>
+</div>
+
+<div id="gameScreen">
+  <div id="map"></div>
+  <canvas id="overlay"></canvas>
+  <div id="hud">
+    <div class="hud-tl">
+      <div class="hud-city-name" id="hudCity">—</div>
+      <div class="hud-coords" id="hudCoords"></div>
+    </div>
+    <div class="hud-speed-box">
+      <div class="hud-kmh" id="hudSpeed">0</div>
+      <div class="hud-unit">km/h</div>
+    </div>
+    <div class="hud-gear" id="hudGear">P</div>
+  </div>
+  <div id="hitFlash"></div>
+  <div id="minimapWrap">
+    <canvas id="minimapCanvas" width="130" height="130"></canvas>
+    <div class="mm-label">RADAR</div>
+  </div>
+  <button id="backBtn" onclick="backToMenu()">◀ MENU</button>
+  <div id="touchControls">
+    <div class="tc-row"><div class="tc-btn" id="tc-up">▲</div></div>
+    <div class="tc-row">
+      <div class="tc-btn" id="tc-left">◀</div>
+      <div class="tc-btn" id="tc-down">▼</div>
+      <div class="tc-btn" id="tc-right">▶</div>
+    </div>
+  </div>
+</div>
+
+<!-- UNIQUE bloc script : tout est ici, Leaflet chargé dynamiquement -->
+<script>
+(function() {
+  // ── Constantes physique ──
+  const ZOOM       = 17;
+  const M_PER_DEG  = 111320;
+  const CAR_HW     = 2.0;
+  const CAR_HH     = 4.0;
+  const MAX_SPD    = 20;
+  const ACCEL      = 9;
+  const BRAKE_F    = 16;
+  const ROLLING    = 0.984;
+  const STEER_BASE = 3.0;
+  const STEER_MIN  = 1.2;
+  const GRIP       = 0.82;
+  const GRIP_DRIFT = 0.62;
+  const BOUNCE     = 0.25;
+  const D2R        = Math.PI / 180;
+
+  // ── État global ──
+  let leafMap = null, animId = null;
+  let buildings = [], bldCenter = null, trail = [];
+  let lastTs = null, cityName = '';
+  let flashTO = null;
+  let keys = { up:false, down:false, left:false, right:false };
+  let car  = { lat:0, lng:0, heading:0, vn:0, ve:0 };
+
+  // ── Utilitaires HUD ──
+  function setLoad(p, msg) {
+    document.getElementById('loadBar').style.width = p + '%';
+    document.getElementById('loadStatus').textContent = msg;
+  }
+
+  // ────────────────────────────────────────────────
+  // Chargement dynamique de Leaflet (CSS + JS)
+  // ────────────────────────────────────────────────
+  function loadLeaflet(cb) {
+    // CSS
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+    document.head.appendChild(css);
+
+    // JS
+    const js = document.createElement('script');
+    js.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    js.onload = function() {
+      if (typeof L !== 'undefined') { cb(); }
+      else { tryFallback(cb); }
+    };
+    js.onerror = function() { tryFallback(cb); };
+    document.head.appendChild(js);
+  }
+
+  function tryFallback(cb) {
+    const js2 = document.createElement('script');
+    js2.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    js2.onload = function() { if (typeof L !== 'undefined') cb(); else alert('Impossible de charger Leaflet. Vérifiez votre connexion.'); };
+    js2.onerror = function() { alert('Impossible de charger Leaflet. Vérifiez votre connexion.'); };
+    document.head.appendChild(js2);
+  }
+
+  // ────────────────────────────────────────────────
+  // Démarrage
+  // ────────────────────────────────────────────────
+  loadLeaflet(function() {
+    setupInputs();
+    // Les boutons ville appellent pickCity() qui est exposé sur window
+  });
+
+  function setupInputs() {
+    const KMAP = {
+      ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
+      w:'up',s:'down',a:'left',d:'right',
+      W:'up',S:'down',A:'left',D:'right',
+      z:'up',q:'left',Z:'up',Q:'left',
+    };
+    window.addEventListener('keydown', e => {
+      if (KMAP[e.key]) { keys[KMAP[e.key]] = true; e.preventDefault(); }
+    });
+    window.addEventListener('keyup', e => {
+      if (KMAP[e.key]) keys[KMAP[e.key]] = false;
+    });
+
+    const TC = {'tc-up':'up','tc-left':'left','tc-down':'down','tc-right':'right'};
+    Object.entries(TC).forEach(([id, k]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const on  = e => { e.preventDefault(); keys[k]=true;  el.classList.add('pressed'); };
+      const off = e => { e.preventDefault(); keys[k]=false; el.classList.remove('pressed'); };
+      el.addEventListener('touchstart',  on,  {passive:false});
+      el.addEventListener('touchend',    off, {passive:false});
+      el.addEventListener('touchcancel', off, {passive:false});
+      el.addEventListener('mousedown',   on);
+      el.addEventListener('mouseup',     off);
+      el.addEventListener('mouseleave',  off);
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      if (leafMap) leafMap.invalidateSize();
+    });
+  }
+
+  // ── Exposé sur window pour les onclick inline ──
+  window.pickCity = function(name, lat, lng) {
+    cityName = name;
+    car = { lat, lng, heading:0, vn:0, ve:0 };
+    keys = { up:false, down:false, left:false, right:false };
+    buildings = []; bldCenter = null; trail = [];
+
+    document.getElementById('cityScreen').style.display = 'none';
+    document.getElementById('loadScreen').style.display = 'flex';
+    document.getElementById('loadCityName').textContent = name.toUpperCase();
+    setLoad(5, 'INITIALISATION…');
+
+    setTimeout(() => initGame(lat, lng), 100);
+  };
+
+  window.backToMenu = function() {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (leafMap) { leafMap.remove(); leafMap = null; }
+    keys = { up:false, down:false, left:false, right:false };
+    buildings = []; bldCenter = null; trail = [];
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('cityScreen').style.display = 'flex';
+  };
+
+  // ────────────────────────────────────────────────
+  // Init jeu
+  // ────────────────────────────────────────────────
+  function initGame(lat, lng) {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (leafMap) { leafMap.remove(); leafMap = null; }
+
+    const gs = document.getElementById('gameScreen');
+    gs.style.display = 'block';
+    gs.style.visibility = 'hidden';
+    resizeCanvas();
+
+    leafMap = L.map('map', {
+      center: [lat, lng], zoom: ZOOM,
+      zoomControl: false, attributionControl: true,
+      dragging: false, scrollWheelZoom: false,
+      doubleClickZoom: false, keyboard: false,
+      touchZoom: false, boxZoom: false,
+    });
+
+    // Satellite ESRI — gratuit, sans clé API
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom:19, attribution:'© Esri' }
+    ).addTo(leafMap);
+
+    setLoad(30, 'TUILES SATELLITE…');
+
+    loadBuildings(lat, lng).then(() => {
+      setLoad(95, 'DÉMARRAGE…');
+      leafMap.invalidateSize();
+      setTimeout(() => {
+        document.getElementById('loadScreen').style.display = 'none';
+        gs.style.visibility = 'visible';
+        document.getElementById('hudCity').textContent = cityName.toUpperCase();
+        lastTs = null;
+        animId = requestAnimationFrame(tick);
+      }, 300);
+    });
+  }
+
+  function resizeCanvas() {
+    const cv = document.getElementById('overlay');
+    if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  }
+
+  // ────────────────────────────────────────────────
+  // Bâtiments Overpass
+  // ────────────────────────────────────────────────
+  async function loadBuildings(lat, lng) {
+    setLoad(55, 'CHARGEMENT BÂTIMENTS…');
+    const R = 0.004;
+    const q = `[out:json][timeout:25];(way["building"](${lat-R},${lng-R*1.5},${lat+R},${lng+R*1.5}););out body;>;out skel qt;`;
+
+    // Plusieurs instances Overpass publiques en fallback
+    const ENDPOINTS = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    ];
+
+    for (const url of ENDPOINTS) {
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 12000); // 12s timeout
+        const r = await fetch(url + '?data=' + encodeURIComponent(q), {
+          signal: controller.signal,
+        });
+        clearTimeout(tid);
+        if (!r.ok) continue;
+        const d = await r.json();
+        buildings = parseBuildings(d);
+        bldCenter = { lat, lng };
+        setLoad(85, `${buildings.length} BÂTIMENTS CHARGÉS`);
+        return; // succès
+      } catch(e) {
+        console.warn(`Overpass ${url} failed:`, e.message);
+      }
+    }
+
+    // Tous les endpoints ont échoué — on joue sans collisions
+    console.warn('All Overpass endpoints failed, playing without buildings.');
+    buildings = [];
+    bldCenter = { lat, lng }; // évite de re-tenter en boucle
+    setLoad(85, 'JEU SANS COLLISIONS');
+  }
+
+  function parseBuildings(data) {
+    const nodes = {};
+    data.elements.forEach(e => { if (e.type==='node') nodes[e.id]={lat:e.lat,lng:e.lon}; });
+    const res = [];
+    data.elements.forEach(e => {
+      if (e.type==='way' && e.nodes && e.nodes.length >= 3) {
+        const poly = e.nodes.map(id => nodes[id]).filter(Boolean);
+        if (poly.length >= 3) res.push({ poly, bounds: bbox(poly) });
+      }
+    });
+    return res;
+  }
+
+  function bbox(poly) {
+    let n=-Infinity,s=Infinity,e=-Infinity,w=Infinity;
+    for (const p of poly) {
+      if(p.lat>n)n=p.lat; if(p.lat<s)s=p.lat;
+      if(p.lng>e)e=p.lng; if(p.lng<w)w=p.lng;
+    }
+    return {n,s,e,w};
+  }
+
+  function maybeReload() {
+    if (!bldCenter) return;
+    const dLat = Math.abs(car.lat - bldCenter.lat) * M_PER_DEG;
+    const dLng = Math.abs(car.lng - bldCenter.lng) * M_PER_DEG * Math.cos(car.lat*D2R);
+    if (dLat > 220 || dLng > 300) loadBuildings(car.lat, car.lng);
+  }
+
+  // ────────────────────────────────────────────────
+  // Boucle de jeu
+  // ────────────────────────────────────────────────
+  function tick(ts) {
+    animId = requestAnimationFrame(tick);
+    if (!lastTs) { lastTs = ts; return; }
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+    update(dt);
+    render();
+  }
+
+  // ────────────────────────────────────────────────
+  // Physique
+  // ────────────────────────────────────────────────
+  function update(dt) {
+    const hr  = car.heading * D2R;
+    const fN  = Math.cos(hr), fE = Math.sin(hr);
+    const spd = Math.hypot(car.vn, car.ve);
+
+    // Braquage
+    if (spd > 0.4) {
+      const t = Math.min(spd / MAX_SPD, 1);
+      const steer = STEER_BASE + (STEER_MIN - STEER_BASE) * t;
+      const fwdSpd = car.vn*fN + car.ve*fE;
+      const dir = fwdSpd >= 0 ? 1 : -1;
+      if (keys.left)  car.heading -= steer * dir;
+      if (keys.right) car.heading += steer * dir;
+      car.heading = ((car.heading % 360) + 360) % 360;
+    }
+
+    const hr2 = car.heading * D2R;
+    const fN2 = Math.cos(hr2), fE2 = Math.sin(hr2);
+
+    // Gaz / frein
+    if (keys.up) {
+      car.vn += fN2 * ACCEL * dt;
+      car.ve += fE2 * ACCEL * dt;
+    }
+    if (keys.down) {
+      const fwdSpd = car.vn*fN2 + car.ve*fE2;
+      if (spd < 0.4) {
+        car.vn -= fN2 * ACCEL * 0.55 * dt;
+        car.ve -= fE2 * ACCEL * 0.55 * dt;
+      } else {
+        car.vn -= fN2 * BRAKE_F * dt;
+        car.ve -= fE2 * BRAKE_F * dt;
+      }
+    }
+
+    // Grip latéral / dérapage
+    const latN = -fE2, latE = fN2;
+    const fwdC = car.vn*fN2 + car.ve*fE2;
+    const latC = car.vn*latN + car.ve*latE;
+    const grip = Math.abs(latC) > 2.5 ? GRIP_DRIFT : GRIP;
+    const newLat = latC * grip;
+    car.vn = fwdC*fN2 + newLat*latN;
+    car.ve = fwdC*fE2 + newLat*latE;
+
+    // Friction roulement
+    car.vn *= ROLLING;
+    car.ve *= ROLLING;
+    if (Math.hypot(car.vn, car.ve) < 0.05) { car.vn = 0; car.ve = 0; }
+
+    // Limite vitesse
+    const s2 = Math.hypot(car.vn, car.ve);
+    if (s2 > MAX_SPD) { car.vn = car.vn/s2*MAX_SPD; car.ve = car.ve/s2*MAX_SPD; }
+
+    // Intégration position
+    const cosLat = Math.cos(car.lat * D2R);
+    const nLat = car.lat + car.vn * dt / M_PER_DEG;
+    const nLng = car.lng + car.ve * dt / (M_PER_DEG * cosLat);
+
+    // Collision
+    if (checkCol(nLat, nLng)) {
+      car.vn *= -BOUNCE;
+      car.ve *= -BOUNCE;
+      flashHit();
+    } else {
+      car.lat = nLat;
+      car.lng = nLng;
+    }
+
+    if (leafMap) leafMap.panTo([car.lat, car.lng], { animate:false });
+
+    // HUD
+    const kmh = Math.round(Math.hypot(car.vn, car.ve) * 3.6);
+    document.getElementById('hudSpeed').textContent = kmh;
+    document.getElementById('hudCoords').textContent = car.lat.toFixed(5) + '  ' + car.lng.toFixed(5);
+
+    const gEl = document.getElementById('hudGear');
+    const cs  = Math.hypot(car.vn, car.ve);
+    const fwd = car.vn*Math.cos(car.heading*D2R) + car.ve*Math.sin(car.heading*D2R);
+    if (cs < 0.1)    { gEl.textContent='P'; gEl.className='hud-gear'; }
+    else if (fwd>=0) { gEl.textContent='D'; gEl.className='hud-gear'; }
+    else             { gEl.textContent='R'; gEl.className='hud-gear rev'; }
+
+    trail.push({ lat:car.lat, lng:car.lng });
+    if (trail.length > 400) trail.shift();
+
+    maybeReload();
+  }
+
+  // ────────────────────────────────────────────────
+  // Collision
+  // ────────────────────────────────────────────────
+  function checkCol(lat, lng) {
+    const cosLat = Math.cos(lat * D2R);
+    const hr = car.heading * D2R;
+    const fLat =  Math.cos(hr)*CAR_HH/M_PER_DEG;
+    const fLng =  Math.sin(hr)*CAR_HH/(M_PER_DEG*cosLat);
+    const rLat = -Math.sin(hr)*CAR_HW/M_PER_DEG;
+    const rLng =  Math.cos(hr)*CAR_HW/(M_PER_DEG*cosLat);
+    const corners = [
+      {lat:lat+fLat+rLat, lng:lng+fLng+rLng},
+      {lat:lat+fLat-rLat, lng:lng+fLng-rLng},
+      {lat:lat-fLat+rLat, lng:lng-fLng+rLng},
+      {lat:lat-fLat-rLat, lng:lng-fLng-rLng},
+    ];
+    for (const b of buildings) {
+      const {n,s,e,w} = b.bounds;
+      if (lat<s-0.0002||lat>n+0.0002||lng<w-0.0003||lng>e+0.0003) continue;
+      for (const c of corners) if (pip(c.lat, c.lng, b.poly)) return true;
+    }
+    return false;
+  }
+
+  function pip(lat, lng, poly) {
+    let inside = false, j = poly.length - 1;
+    for (let i = 0; i < poly.length; i++) {
+      const xi=poly[i].lng, yi=poly[i].lat, xj=poly[j].lng, yj=poly[j].lat;
+      if (((yi>lat) !== (yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+      j = i;
+    }
+    return inside;
+  }
+
+  function flashHit() {
+    const el = document.getElementById('hitFlash');
+    el.style.opacity = '1';
+    if (flashTO) clearTimeout(flashTO);
+    flashTO = setTimeout(() => { el.style.opacity='0'; }, 100);
+  }
+
+  // ────────────────────────────────────────────────
+  // Rendu
+  // ────────────────────────────────────────────────
+  function render() {
+    const cv  = document.getElementById('overlay');
+    const ctx = cv.getContext('2d');
+    const W   = cv.width, H = cv.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const spd = Math.hypot(car.vn, car.ve);
+    if (spd > MAX_SPD * 0.35) drawStreaks(ctx, W, H, spd);
+
+    ctx.save();
+    ctx.translate(W/2, H/2);
+    ctx.rotate(car.heading * D2R);
+    drawCar(ctx, spd);
+    ctx.restore();
+
+    renderMinimap();
+  }
+
+  function drawCar(ctx, spd) {
+    const W=14, H=26;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=10;
+    ctx.shadowOffsetX=3; ctx.shadowOffsetY=3;
+    ctx.fillStyle='#bb1100';
+    ctx.beginPath(); ctx.roundRect(-W/2,-H/2,W,H,3); ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle='#cc1500';
+    ctx.beginPath(); ctx.roundRect(-W/2,-H/2,W,H,3); ctx.fill();
+    ctx.fillStyle='#991000';
+    ctx.beginPath(); ctx.roundRect(-W/2+2,-H/2+6,W-4,H-12,2); ctx.fill();
+
+    ctx.fillStyle='rgba(180,240,255,.75)';
+    ctx.beginPath(); ctx.roundRect(-W/2+3,-H/2+2,W-6,7,1); ctx.fill();
+    ctx.fillStyle='rgba(100,180,210,.4)';
+    ctx.beginPath(); ctx.roundRect(-W/2+3,H/2-9,W-6,6,1); ctx.fill();
+
+    [[-W/2+3,-H/2],[W/2-3,-H/2]].forEach(([hx,hy]) => {
+      const g = ctx.createRadialGradient(hx,hy-1,0,hx,hy-1,7);
+      g.addColorStop(0,'rgba(255,255,180,.9)'); g.addColorStop(1,'rgba(255,255,180,0)');
+      ctx.fillStyle=g; ctx.fillRect(hx-5,hy-7,10,10);
+    });
+    ctx.fillStyle='#ffffc0';
+    ctx.fillRect(-W/2+1,-H/2,3,3); ctx.fillRect(W/2-4,-H/2,3,3);
+
+    ctx.fillStyle = spd < 0.5 ? '#ff7700' : '#cc0000';
+    ctx.fillRect(-W/2+1,H/2-4,4,4); ctx.fillRect(W/2-5,H/2-4,4,4);
+
+    [[-W/2-2,-H/2+3],[W/2-1,-H/2+3],[-W/2-2,H/2-8],[W/2-1,H/2-8]].forEach(([wx,wy]) => {
+      ctx.fillStyle='#1a1a1a'; ctx.fillRect(wx,wy,3,5);
+      ctx.fillStyle='#3a3a3a'; ctx.fillRect(wx+.5,wy+1,2,3);
+    });
+  }
+
+  function drawStreaks(ctx, W, H, spd) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(spd/MAX_SPD*0.14, 0.14);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    const rad = (car.heading + 180) * D2R;
+    for (let i=0; i<14; i++) {
+      const side = (Math.random()-.5)*W*2;
+      const len  = 25 + Math.random()*90*(spd/MAX_SPD);
+      const sx = W/2 + Math.cos(rad+Math.PI/2)*side;
+      const sy = H/2 + Math.sin(rad+Math.PI/2)*side;
+      ctx.beginPath(); ctx.moveTo(sx,sy);
+      ctx.lineTo(sx+Math.cos(rad)*len, sy+Math.sin(rad)*len);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function renderMinimap() {
+    const cv  = document.getElementById('minimapCanvas');
+    const ctx = cv.getContext('2d');
+    const S   = 130;
+    ctx.clearRect(0,0,S,S);
+    ctx.fillStyle='#080808'; ctx.fillRect(0,0,S,S);
+
+    const cosLat = Math.cos(car.lat * D2R);
+    const SCALE  = 3.5;
+    const toMM   = (lat, lng) => ({
+      x: S/2 + (lng-car.lng)*M_PER_DEG*cosLat/SCALE,
+      y: S/2 - (lat-car.lat)*M_PER_DEG/SCALE,
+    });
+
+    ctx.fillStyle='rgba(255,80,0,.12)'; ctx.strokeStyle='rgba(255,80,0,.35)'; ctx.lineWidth=0.5;
+    for (const b of buildings) {
+      const {n,s} = b.bounds;
+      if (Math.abs(((n+s)/2)-car.lat)*M_PER_DEG > S/2*SCALE*1.2) continue;
+      ctx.beginPath();
+      let first = true;
+      for (const p of b.poly) {
+        const mm = toMM(p.lat, p.lng);
+        first ? ctx.moveTo(mm.x,mm.y) : ctx.lineTo(mm.x,mm.y);
+        first = false;
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    if (trail.length > 1) {
+      ctx.strokeStyle='rgba(255,130,0,.45)'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      trail.forEach((p,i) => {
+        const mm = toMM(p.lat, p.lng);
+        i===0 ? ctx.moveTo(mm.x,mm.y) : ctx.lineTo(mm.x,mm.y);
+      });
+      ctx.stroke();
+    }
+
+    ctx.save();
+    ctx.translate(S/2,S/2); ctx.rotate(car.heading*D2R);
+    ctx.fillStyle='#ff4500'; ctx.shadowColor='#ff4500'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(4,5); ctx.lineTo(-4,5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    const pulse = Math.sin(Date.now()/350)*.5+.5;
+    ctx.strokeStyle=`rgba(255,69,0,${.15+pulse*.4})`; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(S/2,S/2,10+pulse*5,0,Math.PI*2); ctx.stroke();
+  }
+
+})(); // fin IIFE
+</script>
+</body>
+</html>
