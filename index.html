@@ -9,11 +9,8 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;background:#000;font-family:'Share Tech Mono',monospace;color:#fff;}
 
-#cityScreen{
-  position:fixed;inset:0;z-index:9999;background:#0a0a0a;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:18px;padding:20px;overflow-y:auto;
-}
+/* ── CITY SELECT ── */
+#cityScreen{position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;overflow-y:auto;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,11vw,100px);letter-spacing:6px;color:#ff4500;text-shadow:0 0 40px #ff450077,4px 4px 0 #800;line-height:1;}
 .logo span{color:#fff;}
 .subtitle{font-size:11px;color:#555;letter-spacing:4px;text-transform:uppercase;}
@@ -25,16 +22,19 @@ html,body{width:100%;height:100%;background:#000;font-family:'Share Tech Mono',m
 .city-btn:hover .ctry,.city-btn:active .ctry{color:#ffbb88;}
 .hint{font-size:10px;color:#333;letter-spacing:1px;text-align:center;line-height:2.2;}
 
+/* ── LOADING ── */
 #loadScreen{position:fixed;inset:0;z-index:9998;background:#0a0a0a;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 .load-city{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:6px;color:#ff4500;}
 .load-bar-bg{width:260px;height:3px;background:#1a1a1a;}
 .load-bar{height:3px;background:#ff4500;width:0%;box-shadow:0 0 10px #ff4500;transition:width .2s;}
 .load-status{font-size:11px;color:#444;letter-spacing:2px;}
 
+/* ── GAME ── */
 #gameScreen{position:fixed;inset:0;display:none;}
 #map{position:absolute;top:0;left:0;width:100%;height:100%;}
 #overlay{position:absolute;top:0;left:0;pointer-events:none;z-index:400;}
 
+/* ── HUD ── */
 #hud{position:absolute;inset:0;pointer-events:none;z-index:500;}
 .hud-tl{position:absolute;top:12px;left:14px;}
 .hud-city-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:#ff4500;text-shadow:2px 2px 0 #600;}
@@ -46,13 +46,76 @@ html,body{width:100%;height:100%;background:#000;font-family:'Share Tech Mono',m
 .hud-gear.rev{color:#ff4500;}
 #hitFlash{position:absolute;inset:0;background:rgba(255,50,0,.3);pointer-events:none;z-index:450;opacity:0;transition:opacity .05s;}
 
+/* ── MINIMAP ── */
 #minimapWrap{position:absolute;bottom:16px;right:14px;z-index:500;width:130px;height:130px;border:2px solid #ff4500;box-shadow:0 0 16px #ff450055;overflow:hidden;}
 #minimapCanvas{display:block;}
 .mm-label{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:9px;color:#ff4500;letter-spacing:2px;}
 
-#backBtn{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:600;pointer-events:all;background:rgba(0,0,0,.7);border:1px solid #2a2a2a;color:#444;font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 14px;cursor:pointer;letter-spacing:2px;transition:all .2s;}
-#backBtn:hover{border-color:#ff4500;color:#ff4500;}
+/* ── TOP BUTTONS ── */
+.top-btns{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:600;pointer-events:all;display:flex;gap:8px;}
+.top-btn{background:rgba(0,0,0,.75);border:1px solid #2a2a2a;color:#555;font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 12px;cursor:pointer;letter-spacing:2px;transition:all .2s;white-space:nowrap;}
+.top-btn:hover{border-color:#ff4500;color:#ff4500;}
 
+/* ── CONFIG PANEL ── */
+#cfgPanel{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:700;pointer-events:all;
+  background:rgba(8,8,8,.97);
+  border:1px solid #ff4500;
+  box-shadow:0 0 40px #ff450033;
+  width:min(420px,96vw);
+  display:none;flex-direction:column;
+  font-family:'Share Tech Mono',monospace;
+  overflow:hidden;
+}
+.cfg-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;
+  border-bottom:1px solid #1a1a1a;
+  background:#0d0d0d;
+}
+.cfg-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#ff4500;}
+.cfg-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:2px 6px;transition:color .15s;}
+.cfg-close:hover{color:#ff4500;}
+.cfg-body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;max-height:80vh;overflow-y:auto;}
+
+/* Section label */
+.cfg-section{font-size:9px;color:#ff4500;letter-spacing:3px;text-transform:uppercase;margin-bottom:-6px;border-bottom:1px solid #1a1a1a;padding-bottom:4px;}
+
+/* Toggle row */
+.cfg-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.cfg-label{font-size:11px;color:#888;letter-spacing:1px;}
+
+/* Toggle switch */
+.toggle{position:relative;width:42px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:#1a1a1a;border:1px solid #333;border-radius:11px;cursor:pointer;transition:all .2s;}
+.toggle input:checked + .toggle-track{background:#ff4500;border-color:#ff4500;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;}
+.toggle input:checked ~ .toggle-thumb{transform:translateX(20px);}
+/* fix: thumb inside label */
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;background:#555;border-radius:50%;transition:transform .2s,background .2s;}
+.toggle input:checked + .toggle-track::after{transform:translateX(20px);background:#fff;}
+
+/* Slider row */
+.cfg-slider-row{display:flex;flex-direction:column;gap:5px;}
+.cfg-slider-top{display:flex;justify-content:space-between;align-items:center;}
+.cfg-val{font-size:11px;color:#ff4500;min-width:40px;text-align:right;}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:3px;background:#1a1a1a;outline:none;
+  border-radius:2px;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#ff4500;border-radius:50%;cursor:pointer;}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;background:#ff4500;border-radius:50%;border:none;cursor:pointer;}
+
+/* Zoom display */
+.cfg-zoom-row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.zoom-btn{background:#111;border:1px solid #333;color:#aaa;width:30px;height:30px;font-size:16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.zoom-btn:hover{background:#ff4500;border-color:#ff4500;color:#fff;}
+.zoom-val{font-size:18px;font-family:'Bebas Neue',sans-serif;color:#fff;min-width:32px;text-align:center;}
+
+/* ── TOUCH CONTROLS ── */
 #touchControls{position:absolute;bottom:16px;left:14px;z-index:600;pointer-events:all;display:flex;flex-direction:column;gap:6px;align-items:center;}
 .tc-row{display:flex;gap:6px;}
 .tc-btn{width:54px;height:54px;background:rgba(10,10,10,.82);border:2px solid #2a2a2a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:background .08s,border-color .08s;}
@@ -63,6 +126,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
 </head>
 <body>
 
+<!-- CITY SELECT -->
 <div id="cityScreen">
   <div class="logo">GTA<span>Maps</span></div>
   <div class="subtitle">choisissez votre ville</div>
@@ -80,15 +144,18 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
   <div class="hint">ZQSD / WASD / Flèches · Mobile : boutons tactiles</div>
 </div>
 
+<!-- LOADING -->
 <div id="loadScreen">
   <div class="load-city" id="loadCityName">—</div>
   <div class="load-bar-bg"><div class="load-bar" id="loadBar"></div></div>
   <div class="load-status" id="loadStatus">CHARGEMENT…</div>
 </div>
 
+<!-- GAME -->
 <div id="gameScreen">
   <div id="map"></div>
   <canvas id="overlay"></canvas>
+
   <div id="hud">
     <div class="hud-tl">
       <div class="hud-city-name" id="hudCity">—</div>
@@ -101,11 +168,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     <div class="hud-gear" id="hudGear">P</div>
   </div>
   <div id="hitFlash"></div>
+
   <div id="minimapWrap">
     <canvas id="minimapCanvas" width="130" height="130"></canvas>
     <div class="mm-label">RADAR</div>
   </div>
-  <button id="backBtn" onclick="backToMenu()">◀ MENU</button>
+
+  <!-- Top buttons -->
+  <div class="top-btns">
+    <button class="top-btn" onclick="backToMenu()">◀ MENU</button>
+    <button class="top-btn" onclick="openConfig()">⚙ CONFIG</button>
+  </div>
+
+  <!-- Touch controls -->
   <div id="touchControls">
     <div class="tc-row"><div class="tc-btn" id="tc-up">▲</div></div>
     <div class="tc-row">
@@ -114,78 +189,172 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
       <div class="tc-btn" id="tc-right">▶</div>
     </div>
   </div>
+
+  <!-- CONFIG PANEL -->
+  <div id="cfgPanel">
+    <div class="cfg-header">
+      <span class="cfg-title">⚙ Configuration</span>
+      <button class="cfg-close" onclick="closeConfig()">✕</button>
+    </div>
+    <div class="cfg-body">
+
+      <div class="cfg-section">🗺 Affichage carte</div>
+
+      <div class="cfg-row">
+        <span class="cfg-label">Carte satellite</span>
+        <label class="toggle"><input type="checkbox" id="tog-map" checked onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span class="cfg-label">Couche routes (OSM)</span>
+        <label class="toggle"><input type="checkbox" id="tog-roads" onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span class="cfg-label">Contour bâtiments</span>
+        <label class="toggle"><input type="checkbox" id="tog-bld" checked onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span class="cfg-label">Debug collisions (hitbox)</span>
+        <label class="toggle"><input type="checkbox" id="tog-debug" onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span class="cfg-label">Traînée de vitesse</span>
+        <label class="toggle"><input type="checkbox" id="tog-streak" checked onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span class="cfg-label">Minimap</span>
+        <label class="toggle"><input type="checkbox" id="tog-minimap" checked onchange="applyConfig()"><span class="toggle-track"></span></label>
+      </div>
+
+      <div class="cfg-section" style="margin-top:4px">🔍 Zoom carte</div>
+      <div class="cfg-zoom-row">
+        <button class="zoom-btn" onclick="changeZoom(-1)">−</button>
+        <span class="zoom-val" id="zoomVal">19</span>
+        <button class="zoom-btn" onclick="changeZoom(+1)">+</button>
+        <span class="cfg-label" style="font-size:10px;color:#444">zoom Leaflet</span>
+      </div>
+
+      <div class="cfg-section" style="margin-top:4px">🚗 Physique</div>
+
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Vitesse max</span>
+          <span class="cfg-val" id="val-speed"></span>
+        </div>
+        <input type="range" id="sl-speed" min="5" max="60" step="1" oninput="applyConfig()">
+      </div>
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Accélération</span>
+          <span class="cfg-val" id="val-accel"></span>
+        </div>
+        <input type="range" id="sl-accel" min="2" max="30" step="0.5" oninput="applyConfig()">
+      </div>
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Freinage</span>
+          <span class="cfg-val" id="val-brake"></span>
+        </div>
+        <input type="range" id="sl-brake" min="5" max="50" step="1" oninput="applyConfig()">
+      </div>
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Grip (anti-dérapage)</span>
+          <span class="cfg-val" id="val-grip"></span>
+        </div>
+        <input type="range" id="sl-grip" min="0.3" max="0.99" step="0.01" oninput="applyConfig()">
+      </div>
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Friction roulement</span>
+          <span class="cfg-val" id="val-roll"></span>
+        </div>
+        <input type="range" id="sl-roll" min="0.90" max="0.999" step="0.001" oninput="applyConfig()">
+      </div>
+      <div class="cfg-slider-row">
+        <div class="cfg-slider-top">
+          <span class="cfg-label">Angle braquage (°/frame)</span>
+          <span class="cfg-val" id="val-steer"></span>
+        </div>
+        <input type="range" id="sl-steer" min="0.5" max="6" step="0.1" oninput="applyConfig()">
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<!-- UNIQUE bloc script : tout est ici, Leaflet chargé dynamiquement -->
 <script>
-(function() {
-  // ── Constantes physique ──
-  const ZOOM       = 17;
-  const M_PER_DEG  = 111320;
-  const CAR_HW     = 2.0;
-  const CAR_HH     = 4.0;
-  const MAX_SPD    = 20;
-  const ACCEL      = 9;
-  const BRAKE_F    = 16;
-  const ROLLING    = 0.984;
-  const STEER_BASE = 3.0;
-  const STEER_MIN  = 1.2;
-  const GRIP       = 0.82;
-  const GRIP_DRIFT = 0.62;
-  const BOUNCE     = 0.25;
-  const D2R        = Math.PI / 180;
+(function () {
+  // ── Constantes de base ──
+  const M_PER_DEG = 111320;
+  const CAR_HW    = 2.0;
+  const CAR_HH    = 4.0;
+  const BOUNCE    = 0.25;
+  const D2R       = Math.PI / 180;
 
-  // ── État global ──
+  // ── Config (modifiable via panneau) ──
+  let cfg = {
+    zoom:        19,
+    maxSpd:      20,
+    accel:       9,
+    brake:       16,
+    rolling:     0.984,
+    grip:        0.82,
+    gripDrift:   0.62,
+    steerBase:   3.0,
+    steerMin:    1.2,
+    showMap:     true,
+    showRoads:   false,
+    showBld:     true,
+    showDebug:   false,
+    showStreak:  true,
+    showMinimap: true,
+  };
+
+  // ── État ──
   let leafMap = null, animId = null;
   let buildings = [], bldCenter = null, trail = [];
   let lastTs = null, cityName = '';
   let flashTO = null;
-  let keys = { up:false, down:false, left:false, right:false };
-  let car  = { lat:0, lng:0, heading:0, vn:0, ve:0 };
+  let keys    = { up:false, down:false, left:false, right:false };
+  let car     = { lat:0, lng:0, heading:0, vn:0, ve:0 };
+  let satelliteLayer = null, roadsLayer = null, bldLayer = null;
 
-  // ── Utilitaires HUD ──
+  // ── HUD helpers ──
   function setLoad(p, msg) {
     document.getElementById('loadBar').style.width = p + '%';
     document.getElementById('loadStatus').textContent = msg;
   }
 
-  // ────────────────────────────────────────────────
-  // Chargement dynamique de Leaflet (CSS + JS)
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // Leaflet dynamique
+  // ──────────────────────────────────────────────
   function loadLeaflet(cb) {
-    // CSS
     const css = document.createElement('link');
     css.rel = 'stylesheet';
     css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
     document.head.appendChild(css);
-
-    // JS
     const js = document.createElement('script');
     js.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-    js.onload = function() {
-      if (typeof L !== 'undefined') { cb(); }
-      else { tryFallback(cb); }
-    };
-    js.onerror = function() { tryFallback(cb); };
+    js.onload = () => typeof L !== 'undefined' ? cb() : tryFallback(cb);
+    js.onerror = () => tryFallback(cb);
     document.head.appendChild(js);
   }
-
   function tryFallback(cb) {
     const js2 = document.createElement('script');
     js2.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    js2.onload = function() { if (typeof L !== 'undefined') cb(); else alert('Impossible de charger Leaflet. Vérifiez votre connexion.'); };
-    js2.onerror = function() { alert('Impossible de charger Leaflet. Vérifiez votre connexion.'); };
+    js2.onload = () => typeof L !== 'undefined' ? cb() : alert('Leaflet introuvable.');
+    js2.onerror = () => alert('Leaflet introuvable.');
     document.head.appendChild(js2);
   }
 
-  // ────────────────────────────────────────────────
-  // Démarrage
-  // ────────────────────────────────────────────────
-  loadLeaflet(function() {
+  loadLeaflet(() => {
     setupInputs();
-    // Les boutons ville appellent pickCity() qui est exposé sur window
+    initConfigPanel();
   });
 
+  // ──────────────────────────────────────────────
+  // Inputs
+  // ──────────────────────────────────────────────
   function setupInputs() {
     const KMAP = {
       ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
@@ -194,14 +363,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
       z:'up',q:'left',Z:'up',Q:'left',
     };
     window.addEventListener('keydown', e => {
-      if (KMAP[e.key]) { keys[KMAP[e.key]] = true; e.preventDefault(); }
+      if (KMAP[e.key]) { keys[KMAP[e.key]]=true; e.preventDefault(); }
+      if (e.key==='Escape') closeConfig();
     });
-    window.addEventListener('keyup', e => {
-      if (KMAP[e.key]) keys[KMAP[e.key]] = false;
-    });
+    window.addEventListener('keyup', e => { if (KMAP[e.key]) keys[KMAP[e.key]]=false; });
 
     const TC = {'tc-up':'up','tc-left':'left','tc-down':'down','tc-right':'right'};
-    Object.entries(TC).forEach(([id, k]) => {
+    Object.entries(TC).forEach(([id,k]) => {
       const el = document.getElementById(id);
       if (!el) return;
       const on  = e => { e.preventDefault(); keys[k]=true;  el.classList.add('pressed'); };
@@ -209,18 +377,89 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
       el.addEventListener('touchstart',  on,  {passive:false});
       el.addEventListener('touchend',    off, {passive:false});
       el.addEventListener('touchcancel', off, {passive:false});
-      el.addEventListener('mousedown',   on);
-      el.addEventListener('mouseup',     off);
-      el.addEventListener('mouseleave',  off);
+      el.addEventListener('mousedown', on);
+      el.addEventListener('mouseup',   off);
+      el.addEventListener('mouseleave',off);
     });
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      if (leafMap) leafMap.invalidateSize();
-    });
+    window.addEventListener('resize', () => { resizeCanvas(); if (leafMap) leafMap.invalidateSize(); });
   }
 
-  // ── Exposé sur window pour les onclick inline ──
+  // ──────────────────────────────────────────────
+  // Config panel
+  // ──────────────────────────────────────────────
+  function initConfigPanel() {
+    document.getElementById('sl-speed').value  = cfg.maxSpd;
+    document.getElementById('sl-accel').value  = cfg.accel;
+    document.getElementById('sl-brake').value  = cfg.brake;
+    document.getElementById('sl-grip').value   = cfg.grip;
+    document.getElementById('sl-roll').value   = cfg.rolling;
+    document.getElementById('sl-steer').value  = cfg.steerBase;
+    document.getElementById('zoomVal').textContent = cfg.zoom;
+    updateSliderLabels();
+  }
+
+  function updateSliderLabels() {
+    document.getElementById('val-speed').textContent  = Math.round(parseFloat(document.getElementById('sl-speed').value)*3.6)+' km/h';
+    document.getElementById('val-accel').textContent  = parseFloat(document.getElementById('sl-accel').value).toFixed(1)+' m/s²';
+    document.getElementById('val-brake').textContent  = parseFloat(document.getElementById('sl-brake').value).toFixed(0)+' m/s²';
+    document.getElementById('val-grip').textContent   = parseFloat(document.getElementById('sl-grip').value).toFixed(2);
+    document.getElementById('val-roll').textContent   = parseFloat(document.getElementById('sl-roll').value).toFixed(3);
+    document.getElementById('val-steer').textContent  = parseFloat(document.getElementById('sl-steer').value).toFixed(1)+'°';
+  }
+
+  window.applyConfig = function() {
+    cfg.maxSpd    = parseFloat(document.getElementById('sl-speed').value);
+    cfg.accel     = parseFloat(document.getElementById('sl-accel').value);
+    cfg.brake     = parseFloat(document.getElementById('sl-brake').value);
+    cfg.grip      = parseFloat(document.getElementById('sl-grip').value);
+    cfg.gripDrift = cfg.grip * 0.75;
+    cfg.rolling   = parseFloat(document.getElementById('sl-roll').value);
+    cfg.steerBase = parseFloat(document.getElementById('sl-steer').value);
+    cfg.steerMin  = cfg.steerBase * 0.4;
+
+    cfg.showMap     = document.getElementById('tog-map').checked;
+    cfg.showRoads   = document.getElementById('tog-roads').checked;
+    cfg.showBld     = document.getElementById('tog-bld').checked;
+    cfg.showDebug   = document.getElementById('tog-debug').checked;
+    cfg.showStreak  = document.getElementById('tog-streak').checked;
+    cfg.showMinimap = document.getElementById('tog-minimap').checked;
+
+    updateSliderLabels();
+    applyLayerVisibility();
+    document.getElementById('minimapWrap').style.display = cfg.showMinimap ? '' : 'none';
+  };
+
+  function applyLayerVisibility() {
+    if (!leafMap) return;
+    if (satelliteLayer) {
+      if (cfg.showMap) { if (!leafMap.hasLayer(satelliteLayer)) satelliteLayer.addTo(leafMap); }
+      else             { if ( leafMap.hasLayer(satelliteLayer)) leafMap.removeLayer(satelliteLayer); }
+    }
+    if (roadsLayer) {
+      if (cfg.showRoads) { if (!leafMap.hasLayer(roadsLayer)) roadsLayer.addTo(leafMap); }
+      else               { if ( leafMap.hasLayer(roadsLayer)) leafMap.removeLayer(roadsLayer); }
+    }
+  }
+
+  window.changeZoom = function(delta) {
+    cfg.zoom = Math.max(14, Math.min(21, cfg.zoom + delta));
+    document.getElementById('zoomVal').textContent = cfg.zoom;
+    if (leafMap) leafMap.setZoom(cfg.zoom);
+    // reload buildings at new zoom if needed
+    if (bldCenter) loadBuildings(bldCenter.lat, bldCenter.lng);
+  };
+
+  window.openConfig = function() {
+    document.getElementById('cfgPanel').style.display = 'flex';
+  };
+  window.closeConfig = function() {
+    document.getElementById('cfgPanel').style.display = 'none';
+  };
+
+  // ──────────────────────────────────────────────
+  // Ville
+  // ──────────────────────────────────────────────
   window.pickCity = function(name, lat, lng) {
     cityName = name;
     car = { lat, lng, heading:0, vn:0, ve:0 };
@@ -228,27 +467,28 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     buildings = []; bldCenter = null; trail = [];
 
     document.getElementById('cityScreen').style.display = 'none';
-    document.getElementById('loadScreen').style.display = 'flex';
-    document.getElementById('loadCityName').textContent = name.toUpperCase();
+    document.getElementById('loadScreen').style.display  = 'flex';
+    document.getElementById('loadCityName').textContent   = name.toUpperCase();
     setLoad(5, 'INITIALISATION…');
-
     setTimeout(() => initGame(lat, lng), 100);
   };
 
   window.backToMenu = function() {
-    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (animId)  { cancelAnimationFrame(animId); animId = null; }
     if (leafMap) { leafMap.remove(); leafMap = null; }
     keys = { up:false, down:false, left:false, right:false };
     buildings = []; bldCenter = null; trail = [];
+    satelliteLayer = null; roadsLayer = null; bldLayer = null;
     document.getElementById('gameScreen').style.display = 'none';
     document.getElementById('cityScreen').style.display = 'flex';
+    closeConfig();
   };
 
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   // Init jeu
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   function initGame(lat, lng) {
-    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (animId)  { cancelAnimationFrame(animId); animId = null; }
     if (leafMap) { leafMap.remove(); leafMap = null; }
 
     const gs = document.getElementById('gameScreen');
@@ -257,18 +497,26 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     resizeCanvas();
 
     leafMap = L.map('map', {
-      center: [lat, lng], zoom: ZOOM,
-      zoomControl: false, attributionControl: true,
-      dragging: false, scrollWheelZoom: false,
-      doubleClickZoom: false, keyboard: false,
-      touchZoom: false, boxZoom: false,
+      center:[lat,lng], zoom:cfg.zoom,
+      zoomControl:false, attributionControl:true,
+      dragging:false, scrollWheelZoom:false,
+      doubleClickZoom:false, keyboard:false,
+      touchZoom:false, boxZoom:false,
     });
 
-    // Satellite ESRI — gratuit, sans clé API
-    L.tileLayer(
+    // Satellite ESRI
+    satelliteLayer = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom:19, attribution:'© Esri' }
-    ).addTo(leafMap);
+      { maxZoom:21, attribution:'© Esri' }
+    );
+    if (cfg.showMap) satelliteLayer.addTo(leafMap);
+
+    // Routes OSM (semi-transparent)
+    roadsLayer = L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { maxZoom:21, opacity:0.45, attribution:'© OSM contributors' }
+    );
+    if (cfg.showRoads) roadsLayer.addTo(leafMap);
 
     setLoad(30, 'TUILES SATELLITE…');
 
@@ -290,44 +538,34 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
   }
 
-  // ────────────────────────────────────────────────
-  // Bâtiments Overpass
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // Bâtiments Overpass (multi-endpoint)
+  // ──────────────────────────────────────────────
   async function loadBuildings(lat, lng) {
     setLoad(55, 'CHARGEMENT BÂTIMENTS…');
     const R = 0.004;
     const q = `[out:json][timeout:25];(way["building"](${lat-R},${lng-R*1.5},${lat+R},${lng+R*1.5}););out body;>;out skel qt;`;
-
-    // Plusieurs instances Overpass publiques en fallback
     const ENDPOINTS = [
       'https://overpass-api.de/api/interpreter',
       'https://overpass.kumi.systems/api/interpreter',
       'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
     ];
-
     for (const url of ENDPOINTS) {
       try {
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 12000); // 12s timeout
-        const r = await fetch(url + '?data=' + encodeURIComponent(q), {
-          signal: controller.signal,
-        });
+        const ctrl = new AbortController();
+        const tid  = setTimeout(() => ctrl.abort(), 12000);
+        const r    = await fetch(url + '?data=' + encodeURIComponent(q), { signal: ctrl.signal });
         clearTimeout(tid);
         if (!r.ok) continue;
         const d = await r.json();
         buildings = parseBuildings(d);
         bldCenter = { lat, lng };
         setLoad(85, `${buildings.length} BÂTIMENTS CHARGÉS`);
-        return; // succès
-      } catch(e) {
-        console.warn(`Overpass ${url} failed:`, e.message);
-      }
+        return;
+      } catch(e) { console.warn(url, e.message); }
     }
-
-    // Tous les endpoints ont échoué — on joue sans collisions
-    console.warn('All Overpass endpoints failed, playing without buildings.');
     buildings = [];
-    bldCenter = { lat, lng }; // évite de re-tenter en boucle
+    bldCenter = { lat, lng };
     setLoad(85, 'JEU SANS COLLISIONS');
   }
 
@@ -338,43 +576,38 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     data.elements.forEach(e => {
       if (e.type==='way' && e.nodes && e.nodes.length >= 3) {
         const poly = e.nodes.map(id => nodes[id]).filter(Boolean);
-        if (poly.length >= 3) res.push({ poly, bounds: bbox(poly) });
+        if (poly.length >= 3) res.push({ poly, bounds:bbox(poly) });
       }
     });
     return res;
   }
-
   function bbox(poly) {
     let n=-Infinity,s=Infinity,e=-Infinity,w=Infinity;
-    for (const p of poly) {
-      if(p.lat>n)n=p.lat; if(p.lat<s)s=p.lat;
-      if(p.lng>e)e=p.lng; if(p.lng<w)w=p.lng;
-    }
+    for (const p of poly) { if(p.lat>n)n=p.lat; if(p.lat<s)s=p.lat; if(p.lng>e)e=p.lng; if(p.lng<w)w=p.lng; }
     return {n,s,e,w};
   }
-
   function maybeReload() {
     if (!bldCenter) return;
-    const dLat = Math.abs(car.lat - bldCenter.lat) * M_PER_DEG;
-    const dLng = Math.abs(car.lng - bldCenter.lng) * M_PER_DEG * Math.cos(car.lat*D2R);
-    if (dLat > 220 || dLng > 300) loadBuildings(car.lat, car.lng);
+    const dLat = Math.abs(car.lat-bldCenter.lat)*M_PER_DEG;
+    const dLng = Math.abs(car.lng-bldCenter.lng)*M_PER_DEG*Math.cos(car.lat*D2R);
+    if (dLat>220||dLng>300) loadBuildings(car.lat, car.lng);
   }
 
-  // ────────────────────────────────────────────────
-  // Boucle de jeu
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // Boucle
+  // ──────────────────────────────────────────────
   function tick(ts) {
     animId = requestAnimationFrame(tick);
     if (!lastTs) { lastTs = ts; return; }
-    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    const dt = Math.min((ts-lastTs)/1000, 0.05);
     lastTs = ts;
     update(dt);
     render();
   }
 
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   // Physique
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   function update(dt) {
     const hr  = car.heading * D2R;
     const fN  = Math.cos(hr), fE = Math.sin(hr);
@@ -382,58 +615,55 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
 
     // Braquage
     if (spd > 0.4) {
-      const t = Math.min(spd / MAX_SPD, 1);
-      const steer = STEER_BASE + (STEER_MIN - STEER_BASE) * t;
+      const t     = Math.min(spd/cfg.maxSpd, 1);
+      const steer = cfg.steerBase + (cfg.steerMin - cfg.steerBase)*t;
       const fwdSpd = car.vn*fN + car.ve*fE;
-      const dir = fwdSpd >= 0 ? 1 : -1;
+      const dir   = fwdSpd >= 0 ? 1 : -1;
       if (keys.left)  car.heading -= steer * dir;
       if (keys.right) car.heading += steer * dir;
-      car.heading = ((car.heading % 360) + 360) % 360;
+      car.heading = ((car.heading%360)+360)%360;
     }
 
-    const hr2 = car.heading * D2R;
+    const hr2 = car.heading*D2R;
     const fN2 = Math.cos(hr2), fE2 = Math.sin(hr2);
 
     // Gaz / frein
     if (keys.up) {
-      car.vn += fN2 * ACCEL * dt;
-      car.ve += fE2 * ACCEL * dt;
+      car.vn += fN2 * cfg.accel * dt;
+      car.ve += fE2 * cfg.accel * dt;
     }
     if (keys.down) {
-      const fwdSpd = car.vn*fN2 + car.ve*fE2;
       if (spd < 0.4) {
-        car.vn -= fN2 * ACCEL * 0.55 * dt;
-        car.ve -= fE2 * ACCEL * 0.55 * dt;
+        car.vn -= fN2 * cfg.accel * 0.55 * dt;
+        car.ve -= fE2 * cfg.accel * 0.55 * dt;
       } else {
-        car.vn -= fN2 * BRAKE_F * dt;
-        car.ve -= fE2 * BRAKE_F * dt;
+        car.vn -= fN2 * cfg.brake * dt;
+        car.ve -= fE2 * cfg.brake * dt;
       }
     }
 
-    // Grip latéral / dérapage
+    // Grip latéral
     const latN = -fE2, latE = fN2;
     const fwdC = car.vn*fN2 + car.ve*fE2;
     const latC = car.vn*latN + car.ve*latE;
-    const grip = Math.abs(latC) > 2.5 ? GRIP_DRIFT : GRIP;
-    const newLat = latC * grip;
-    car.vn = fwdC*fN2 + newLat*latN;
-    car.ve = fwdC*fE2 + newLat*latE;
+    const grip = Math.abs(latC) > 2.5 ? cfg.gripDrift : cfg.grip;
+    car.vn = fwdC*fN2 + latC*grip*latN;
+    car.ve = fwdC*fE2 + latC*grip*latE;
 
-    // Friction roulement
-    car.vn *= ROLLING;
-    car.ve *= ROLLING;
-    if (Math.hypot(car.vn, car.ve) < 0.05) { car.vn = 0; car.ve = 0; }
+    // Friction
+    car.vn *= cfg.rolling;
+    car.ve *= cfg.rolling;
+    if (Math.hypot(car.vn,car.ve)<0.05) { car.vn=0; car.ve=0; }
 
-    // Limite vitesse
-    const s2 = Math.hypot(car.vn, car.ve);
-    if (s2 > MAX_SPD) { car.vn = car.vn/s2*MAX_SPD; car.ve = car.ve/s2*MAX_SPD; }
+    // Cap vitesse
+    const s2 = Math.hypot(car.vn,car.ve);
+    if (s2 > cfg.maxSpd) { car.vn=car.vn/s2*cfg.maxSpd; car.ve=car.ve/s2*cfg.maxSpd; }
 
-    // Intégration position
-    const cosLat = Math.cos(car.lat * D2R);
-    const nLat = car.lat + car.vn * dt / M_PER_DEG;
-    const nLng = car.lng + car.ve * dt / (M_PER_DEG * cosLat);
+    // Intégration
+    const cosLat = Math.cos(car.lat*D2R);
+    const nLat = car.lat + car.vn*dt/M_PER_DEG;
+    const nLng = car.lng + car.ve*dt/(M_PER_DEG*cosLat);
 
-    // Collision
     if (checkCol(nLat, nLng)) {
       car.vn *= -BOUNCE;
       car.ve *= -BOUNCE;
@@ -443,119 +673,185 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
       car.lng = nLng;
     }
 
-    if (leafMap) leafMap.panTo([car.lat, car.lng], { animate:false });
+    if (leafMap) leafMap.panTo([car.lat,car.lng],{animate:false});
 
     // HUD
-    const kmh = Math.round(Math.hypot(car.vn, car.ve) * 3.6);
+    const kmh = Math.round(Math.hypot(car.vn,car.ve)*3.6);
     document.getElementById('hudSpeed').textContent = kmh;
-    document.getElementById('hudCoords').textContent = car.lat.toFixed(5) + '  ' + car.lng.toFixed(5);
+    document.getElementById('hudCoords').textContent = car.lat.toFixed(5)+'  '+car.lng.toFixed(5);
+    const gEl  = document.getElementById('hudGear');
+    const cs   = Math.hypot(car.vn,car.ve);
+    const fwd  = car.vn*Math.cos(car.heading*D2R)+car.ve*Math.sin(car.heading*D2R);
+    if (cs<0.1)   { gEl.textContent='P'; gEl.className='hud-gear'; }
+    else if(fwd>=0){ gEl.textContent='D'; gEl.className='hud-gear'; }
+    else           { gEl.textContent='R'; gEl.className='hud-gear rev'; }
 
-    const gEl = document.getElementById('hudGear');
-    const cs  = Math.hypot(car.vn, car.ve);
-    const fwd = car.vn*Math.cos(car.heading*D2R) + car.ve*Math.sin(car.heading*D2R);
-    if (cs < 0.1)    { gEl.textContent='P'; gEl.className='hud-gear'; }
-    else if (fwd>=0) { gEl.textContent='D'; gEl.className='hud-gear'; }
-    else             { gEl.textContent='R'; gEl.className='hud-gear rev'; }
-
-    trail.push({ lat:car.lat, lng:car.lng });
-    if (trail.length > 400) trail.shift();
-
+    trail.push({lat:car.lat,lng:car.lng});
+    if (trail.length>400) trail.shift();
     maybeReload();
   }
 
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   // Collision
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
   function checkCol(lat, lng) {
-    const cosLat = Math.cos(lat * D2R);
-    const hr = car.heading * D2R;
+    const cosLat = Math.cos(lat*D2R);
+    const hr = car.heading*D2R;
     const fLat =  Math.cos(hr)*CAR_HH/M_PER_DEG;
     const fLng =  Math.sin(hr)*CAR_HH/(M_PER_DEG*cosLat);
     const rLat = -Math.sin(hr)*CAR_HW/M_PER_DEG;
     const rLng =  Math.cos(hr)*CAR_HW/(M_PER_DEG*cosLat);
     const corners = [
-      {lat:lat+fLat+rLat, lng:lng+fLng+rLng},
-      {lat:lat+fLat-rLat, lng:lng+fLng-rLng},
-      {lat:lat-fLat+rLat, lng:lng-fLng+rLng},
-      {lat:lat-fLat-rLat, lng:lng-fLng-rLng},
+      {lat:lat+fLat+rLat,lng:lng+fLng+rLng},
+      {lat:lat+fLat-rLat,lng:lng+fLng-rLng},
+      {lat:lat-fLat+rLat,lng:lng-fLng+rLng},
+      {lat:lat-fLat-rLat,lng:lng-fLng-rLng},
     ];
     for (const b of buildings) {
       const {n,s,e,w} = b.bounds;
       if (lat<s-0.0002||lat>n+0.0002||lng<w-0.0003||lng>e+0.0003) continue;
-      for (const c of corners) if (pip(c.lat, c.lng, b.poly)) return true;
+      for (const c of corners) if (pip(c.lat,c.lng,b.poly)) return true;
     }
     return false;
   }
 
+  // Renvoie les coins en pixels écran (pour debug)
+  function carCornersScreen(W, H) {
+    if (!leafMap) return [];
+    const cosLat = Math.cos(car.lat*D2R);
+    const hr = car.heading*D2R;
+    const fLat =  Math.cos(hr)*CAR_HH/M_PER_DEG;
+    const fLng =  Math.sin(hr)*CAR_HH/(M_PER_DEG*cosLat);
+    const rLat = -Math.sin(hr)*CAR_HW/M_PER_DEG;
+    const rLng =  Math.cos(hr)*CAR_HW/(M_PER_DEG*cosLat);
+    const geoCorners = [
+      {lat:car.lat+fLat+rLat,lng:car.lng+fLng+rLng},
+      {lat:car.lat+fLat-rLat,lng:car.lng+fLng-rLng},
+      {lat:car.lat-fLat-rLat,lng:car.lng-fLng-rLng},
+      {lat:car.lat-fLat+rLat,lng:car.lng-fLng+rLng},
+    ];
+    return geoCorners.map(c => {
+      const pt = leafMap.latLngToContainerPoint([c.lat,c.lng]);
+      return {x:pt.x,y:pt.y};
+    });
+  }
+
   function pip(lat, lng, poly) {
-    let inside = false, j = poly.length - 1;
-    for (let i = 0; i < poly.length; i++) {
-      const xi=poly[i].lng, yi=poly[i].lat, xj=poly[j].lng, yj=poly[j].lat;
-      if (((yi>lat) !== (yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
-      j = i;
+    let inside=false, j=poly.length-1;
+    for (let i=0;i<poly.length;i++) {
+      const xi=poly[i].lng,yi=poly[i].lat,xj=poly[j].lng,yj=poly[j].lat;
+      if (((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+      j=i;
     }
     return inside;
   }
 
   function flashHit() {
     const el = document.getElementById('hitFlash');
-    el.style.opacity = '1';
+    el.style.opacity='1';
     if (flashTO) clearTimeout(flashTO);
-    flashTO = setTimeout(() => { el.style.opacity='0'; }, 100);
+    flashTO = setTimeout(()=>{ el.style.opacity='0'; },100);
   }
 
-  // ────────────────────────────────────────────────
-  // Rendu
-  // ────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // Rendu canvas
+  // ──────────────────────────────────────────────
   function render() {
     const cv  = document.getElementById('overlay');
     const ctx = cv.getContext('2d');
     const W   = cv.width, H = cv.height;
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
 
-    const spd = Math.hypot(car.vn, car.ve);
-    if (spd > MAX_SPD * 0.35) drawStreaks(ctx, W, H, spd);
+    const spd = Math.hypot(car.vn,car.ve);
 
+    // Traînée de vitesse
+    if (cfg.showStreak && spd > cfg.maxSpd*0.35) drawStreaks(ctx,W,H,spd);
+
+    // Contours bâtiments sur le canvas (si activé)
+    if (cfg.showBld && leafMap) drawBuildingOutlines(ctx);
+
+    // Debug hitbox
+    if (cfg.showDebug) drawDebugHitbox(ctx,W,H);
+
+    // Voiture
     ctx.save();
-    ctx.translate(W/2, H/2);
-    ctx.rotate(car.heading * D2R);
-    drawCar(ctx, spd);
+    ctx.translate(W/2,H/2);
+    ctx.rotate(car.heading*D2R);
+    drawCar(ctx,spd);
     ctx.restore();
 
-    renderMinimap();
+    if (cfg.showMinimap) renderMinimap();
+  }
+
+  function drawBuildingOutlines(ctx) {
+    if (!leafMap) return;
+    ctx.strokeStyle = 'rgba(255,180,0,0.55)';
+    ctx.fillStyle   = 'rgba(255,100,0,0.08)';
+    ctx.lineWidth   = 1.5;
+
+    for (const b of buildings) {
+      const {n,s,e,w} = b.bounds;
+      // Only draw buildings near the car
+      if (Math.abs(((n+s)/2)-car.lat)*M_PER_DEG > 300) continue;
+
+      ctx.beginPath();
+      let first = true;
+      for (const p of b.poly) {
+        const pt = leafMap.latLngToContainerPoint([p.lat,p.lng]);
+        first ? ctx.moveTo(pt.x,pt.y) : ctx.lineTo(pt.x,pt.y);
+        first = false;
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
+  function drawDebugHitbox(ctx, W, H) {
+    const corners = carCornersScreen(W,H);
+    if (corners.length < 4) return;
+    ctx.save();
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath();
+    ctx.moveTo(corners[0].x, corners[0].y);
+    for (let i=1;i<corners.length;i++) ctx.lineTo(corners[i].x,corners[i].y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Draw corner dots
+    ctx.fillStyle='#00ff88';
+    for (const c of corners) { ctx.beginPath(); ctx.arc(c.x,c.y,3,0,Math.PI*2); ctx.fill(); }
+    ctx.restore();
   }
 
   function drawCar(ctx, spd) {
-    const W=14, H=26;
+    const W=14,H=26;
     ctx.save();
     ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=10;
     ctx.shadowOffsetX=3; ctx.shadowOffsetY=3;
     ctx.fillStyle='#bb1100';
     ctx.beginPath(); ctx.roundRect(-W/2,-H/2,W,H,3); ctx.fill();
     ctx.restore();
-
     ctx.fillStyle='#cc1500';
     ctx.beginPath(); ctx.roundRect(-W/2,-H/2,W,H,3); ctx.fill();
     ctx.fillStyle='#991000';
     ctx.beginPath(); ctx.roundRect(-W/2+2,-H/2+6,W-4,H-12,2); ctx.fill();
-
     ctx.fillStyle='rgba(180,240,255,.75)';
     ctx.beginPath(); ctx.roundRect(-W/2+3,-H/2+2,W-6,7,1); ctx.fill();
     ctx.fillStyle='rgba(100,180,210,.4)';
     ctx.beginPath(); ctx.roundRect(-W/2+3,H/2-9,W-6,6,1); ctx.fill();
-
     [[-W/2+3,-H/2],[W/2-3,-H/2]].forEach(([hx,hy]) => {
-      const g = ctx.createRadialGradient(hx,hy-1,0,hx,hy-1,7);
+      const g=ctx.createRadialGradient(hx,hy-1,0,hx,hy-1,7);
       g.addColorStop(0,'rgba(255,255,180,.9)'); g.addColorStop(1,'rgba(255,255,180,0)');
       ctx.fillStyle=g; ctx.fillRect(hx-5,hy-7,10,10);
     });
     ctx.fillStyle='#ffffc0';
     ctx.fillRect(-W/2+1,-H/2,3,3); ctx.fillRect(W/2-4,-H/2,3,3);
-
-    ctx.fillStyle = spd < 0.5 ? '#ff7700' : '#cc0000';
+    ctx.fillStyle=spd<0.5?'#ff7700':'#cc0000';
     ctx.fillRect(-W/2+1,H/2-4,4,4); ctx.fillRect(W/2-5,H/2-4,4,4);
-
-    [[-W/2-2,-H/2+3],[W/2-1,-H/2+3],[-W/2-2,H/2-8],[W/2-1,H/2-8]].forEach(([wx,wy]) => {
+    [[-W/2-2,-H/2+3],[W/2-1,-H/2+3],[-W/2-2,H/2-8],[W/2-1,H/2-8]].forEach(([wx,wy])=>{
       ctx.fillStyle='#1a1a1a'; ctx.fillRect(wx,wy,3,5);
       ctx.fillStyle='#3a3a3a'; ctx.fillRect(wx+.5,wy+1,2,3);
     });
@@ -563,21 +859,24 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
 
   function drawStreaks(ctx, W, H, spd) {
     ctx.save();
-    ctx.globalAlpha = Math.min(spd/MAX_SPD*0.14, 0.14);
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
-    const rad = (car.heading + 180) * D2R;
-    for (let i=0; i<14; i++) {
-      const side = (Math.random()-.5)*W*2;
-      const len  = 25 + Math.random()*90*(spd/MAX_SPD);
-      const sx = W/2 + Math.cos(rad+Math.PI/2)*side;
-      const sy = H/2 + Math.sin(rad+Math.PI/2)*side;
+    ctx.globalAlpha=Math.min(spd/cfg.maxSpd*0.14,0.14);
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1;
+    const rad=(car.heading+180)*D2R;
+    for (let i=0;i<14;i++) {
+      const side=(Math.random()-.5)*W*2;
+      const len=25+Math.random()*90*(spd/cfg.maxSpd);
+      const sx=W/2+Math.cos(rad+Math.PI/2)*side;
+      const sy=H/2+Math.sin(rad+Math.PI/2)*side;
       ctx.beginPath(); ctx.moveTo(sx,sy);
-      ctx.lineTo(sx+Math.cos(rad)*len, sy+Math.sin(rad)*len);
+      ctx.lineTo(sx+Math.cos(rad)*len,sy+Math.sin(rad)*len);
       ctx.stroke();
     }
     ctx.restore();
   }
 
+  // ──────────────────────────────────────────────
+  // Minimap
+  // ──────────────────────────────────────────────
   function renderMinimap() {
     const cv  = document.getElementById('minimapCanvas');
     const ctx = cv.getContext('2d');
@@ -585,34 +884,28 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     ctx.clearRect(0,0,S,S);
     ctx.fillStyle='#080808'; ctx.fillRect(0,0,S,S);
 
-    const cosLat = Math.cos(car.lat * D2R);
-    const SCALE  = 3.5;
-    const toMM   = (lat, lng) => ({
-      x: S/2 + (lng-car.lng)*M_PER_DEG*cosLat/SCALE,
-      y: S/2 - (lat-car.lat)*M_PER_DEG/SCALE,
+    const cosLat=Math.cos(car.lat*D2R);
+    const SCALE=3.5;
+    const toMM=(lat,lng)=>({
+      x:S/2+(lng-car.lng)*M_PER_DEG*cosLat/SCALE,
+      y:S/2-(lat-car.lat)*M_PER_DEG/SCALE,
     });
 
-    ctx.fillStyle='rgba(255,80,0,.12)'; ctx.strokeStyle='rgba(255,80,0,.35)'; ctx.lineWidth=0.5;
-    for (const b of buildings) {
-      const {n,s} = b.bounds;
-      if (Math.abs(((n+s)/2)-car.lat)*M_PER_DEG > S/2*SCALE*1.2) continue;
-      ctx.beginPath();
-      let first = true;
-      for (const p of b.poly) {
-        const mm = toMM(p.lat, p.lng);
-        first ? ctx.moveTo(mm.x,mm.y) : ctx.lineTo(mm.x,mm.y);
-        first = false;
+    if (cfg.showBld) {
+      ctx.fillStyle='rgba(255,80,0,.12)'; ctx.strokeStyle='rgba(255,80,0,.35)'; ctx.lineWidth=0.5;
+      for (const b of buildings) {
+        const {n,s}=b.bounds;
+        if (Math.abs(((n+s)/2)-car.lat)*M_PER_DEG>S/2*SCALE*1.2) continue;
+        ctx.beginPath(); let first=true;
+        for (const p of b.poly) { const mm=toMM(p.lat,p.lng); first?ctx.moveTo(mm.x,mm.y):ctx.lineTo(mm.x,mm.y); first=false; }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
       }
-      ctx.closePath(); ctx.fill(); ctx.stroke();
     }
 
-    if (trail.length > 1) {
+    if (trail.length>1) {
       ctx.strokeStyle='rgba(255,130,0,.45)'; ctx.lineWidth=1.5;
       ctx.beginPath();
-      trail.forEach((p,i) => {
-        const mm = toMM(p.lat, p.lng);
-        i===0 ? ctx.moveTo(mm.x,mm.y) : ctx.lineTo(mm.x,mm.y);
-      });
+      trail.forEach((p,i)=>{ const mm=toMM(p.lat,p.lng); i===0?ctx.moveTo(mm.x,mm.y):ctx.lineTo(mm.x,mm.y); });
       ctx.stroke();
     }
 
@@ -622,12 +915,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:800;ba
     ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(4,5); ctx.lineTo(-4,5); ctx.closePath(); ctx.fill();
     ctx.restore();
 
-    const pulse = Math.sin(Date.now()/350)*.5+.5;
+    const pulse=Math.sin(Date.now()/350)*.5+.5;
     ctx.strokeStyle=`rgba(255,69,0,${.15+pulse*.4})`; ctx.lineWidth=1;
     ctx.beginPath(); ctx.arc(S/2,S/2,10+pulse*5,0,Math.PI*2); ctx.stroke();
   }
 
-})(); // fin IIFE
+})();
 </script>
 </body>
 </html>
